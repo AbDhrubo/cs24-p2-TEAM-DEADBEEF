@@ -1,12 +1,17 @@
 from flask import Blueprint, jsonify, session, request, render_template, redirect, make_response
+
+# import app
 from models import User, Role, db
 
 users = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
 
+permissions = ['Create User', 'Edit Own Information', 'Edit other peoples information', 'Get own information',
+               'Get other users\' information', 'Delete User']
+
+
 @users.route('/', methods=['GET', 'POST'])
 def show_ar_add_users():
-    ######## main challenge is to fix this
     if request.method == 'GET':
         if 1:
             all_users = User.query.all()
@@ -133,3 +138,50 @@ def user_info(userId: int):
                 "message": "Deletion Failed: Method Not Allowed"
             }
             return jsonify(response_data), 500
+
+
+def get_permissions(arr):
+    print(arr)
+    list = []
+    for i in arr:
+        print(i)
+        list.append(permissions[i-1])
+    return list
+
+
+@users.route('/roles')
+def show_all_roles():
+    if request.method == 'GET':
+        if 1:
+            all_roles = Role.query.all()
+            # print(all_roles)
+            if all_roles:
+                # role_data = [{'Role Id': role.id, 'Role Name': role.name,
+                #               'Permissions': get_permissions(role.get_permissions())} for role in all_roles]
+
+                role_data = [{'id': role.id, 'name': role.name} for role in all_roles]
+                response = make_response(jsonify(role_data), 200)
+            else:
+                response = make_response(jsonify({"success": "False", "message": "No Roles Found"}), 404)
+
+            return response
+
+
+@users.route('/<int:userId>/roles', methods=['PUT'])
+def set_role(userId: int):
+    user = User.query.filter_by(id=userId).first()
+    if user:
+        data = request.json
+        role_id = data.get('role_id')
+        role = Role.query.filter_by(id=role_id).first()
+        if role:
+            user.role_id = role_id
+            db.session.commit()
+            response = make_response(jsonify({"success": "True", "message": "User Role updated"}), 201)
+        else:
+            response = make_response(jsonify({"success": "False", "message": "No Role Found"}), 403)
+
+    else:
+        response = make_response(({"success": "False", "message": "No User Found"}), 404)
+
+    return response

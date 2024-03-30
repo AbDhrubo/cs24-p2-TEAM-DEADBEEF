@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toggleable Buttons Form</title>
+<style>
+    body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    }
+
+    form {
+        text-align: center;
+    }
+
+    .toggle-buttons {
+        text-align: right; /* Align switches to the right */
+    }
+
+    .toggle-switch {
+        display: flex;
+        justify-content: space-between; /* Adjust to place switch title and button on both sides */
+        align-items: center; /*Vertically center align switch */
+        width: auto; /* Adjust width as needed */
+        height: 30px;
+        margin: 10px auto;
+        cursor: pointer;
+    }
+
+    .toggle-switch .switch-title {
+        /* margin-right: 10px; */ /* Remove margin-right */
+        align-items: left; /* Remove */
+    }
+
+    .toggle-switch .switch-handle {
+        width: 60px;
+        height: 100%;
+        background-color: #ccc;
+        border-radius: 15px;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .toggle-switch.active .switch-handle {
+        background-color: #007bff;
+    }
+
+    .toggle-switch.active .switch-handle::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #fff;
+    }
+
+    .toggle-button {
+        display: none;
+    }
+
+    #selectedButtons {
+        margin-top: 20px;
+    }
+
+</style>
+</head>
+<body>
+<h3>Edit Permissions: {{role_name}} </h3>
+<form id="myForm">
+
+    <div class="toggle-buttons">
+        <!-- Dynamic generation of toggle switches based on Flask variables -->
+        {% for i in range(count) %}
+        <div class="toggle-switch">
+            <label class="toggle-switch">
+                <span class="switch-title">{{ titles[i] }}</span>
+                <input type="checkbox" class="toggle-button" name="button{{ i+1 }}" value="{{ i+1 }}">
+                <span class="switch-handle"></span>
+            </label>
+        </div>
+
+        {% endfor %}
+    </div>
+
+    <br>
+    <div id="responseMessage"></div>
+    <br>
+    <input type="submit" value="Submit">
+</form>
+
+<div id="selectedButtons"></div>
+
+<script>
+    // Function to handle toggle switch state
+    function toggleSwitch() {
+        var handle = this.querySelector('.switch-handle');
+        if (this.querySelector('.toggle-button').checked) {
+            handle.style.transform = 'translateX(100%)';
+            this.classList.add('active');
+        } else {
+            handle.style.transform = 'translateX(0)';
+            this.classList.remove('active');
+        }
+    }
+
+    // Add click event listeners to toggle switches
+    var switches = document.querySelectorAll('.toggle-switch');
+    switches.forEach(function(switchEl) {
+        switchEl.addEventListener('click', toggleSwitch);
+    });
+
+    // Function to handle form submission
+    document.getElementById('myForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        var formData = new FormData(this);
+        var data = {};
+        for (var pair of formData.entries()) {
+            data[pair[0]] = pair[1];
+        }
+        // Get active toggle button values
+        var activeButtonValues = [];
+        document.querySelectorAll('.toggle-button:checked').forEach(function(button) {
+            activeButtonValues.push(parseInt(button.value)); // Convert string to integer
+        });
+        data.toggleableButtons = activeButtonValues;
+        var selectedButtonsDiv = document.getElementById('selectedButtons');
+
+        //selectedButtonsDiv.textContent = 'Selected Buttons: ' + JSON.stringify(activeButtonValues);
+        var name = "{{role_name}}";
+
+        // Create data object to send to server
+        var data = {
+            role_name: name,
+            permissions: JSON.stringify(activeButtonValues)
+        };
+
+        fetch('/rbac/update-role', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('responseMessage').innerText = data.message;
+            if(data.success) {
+                var form = document.getElementById('myForm');
+                if (form) {
+                    form.reset();
+                }
+                window.location.href = '/roles';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+        console.log(data); // You can send this data to your server or perform any other action
+
+    });
+</script>
+
+</body>
+</html>

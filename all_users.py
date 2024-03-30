@@ -15,6 +15,7 @@ def all_users_view():
 
     if response.status_code == 200:
         users_data = response.json()
+        print(users_data)
         return render_template('all_users.html', users=users_data)
     else:
         return render_template('error.html', code=response.status_code)

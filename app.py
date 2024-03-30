@@ -15,6 +15,8 @@ from all_users import all_users
 from users import users
 from security import security
 from models import db, User, Role
+from roles import roles
+from rbac import rbac
 
 
 app = Flask(__name__)
@@ -38,6 +40,8 @@ app.register_blueprint(dashboard, url_prefix="/dashboard")
 app.register_blueprint(all_users, url_prefix="/all_users")
 app.register_blueprint(users, url_prefix="/users")
 app.register_blueprint(security, url_prefix="/security")
+app.register_blueprint(roles, url_prefix="/roles")
+app.register_blueprint(rbac, url_prefix="/rbac")
 
 
 with app.app_context():

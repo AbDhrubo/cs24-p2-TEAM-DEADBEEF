@@ -37,6 +37,9 @@
             {% if session_role==1 %}
             <a href="/all_users" class="btn btn-dark">User List</a>
             {% endif %}
+            {% if session_role==1 %}
+            <a href="/roles/" class="btn btn-dark">View Roles</a>
+            {% endif %}
             {%if session_role==1 or session_id==user.id %}
             <a href="/all_users/edit/{{user.id}}" class="btn btn-dark">Edit</a>
             {% endif %}
