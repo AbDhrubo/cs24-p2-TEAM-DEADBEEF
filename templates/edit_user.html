@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User Info</title>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class=" row justify-content-center">
+        <div class="col-sm-8">
+  <h2>Edit Info</h2>
+        <form id="edit-form">
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" value="{{user.email}}" required><br>
+
+            {% if session_role==1 %}
+            <label for="role">Select Role:</label><br>
+            <select id="role" name="role" >
+              <option value=1>System Admin</option>
+              <option value=2>STS Manager</option>
+              <option value=3>Landfill Manager</option>
+              <option value=4>Unassigned</option>
+            </select><br>
+            {% endif %}
+
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" value="{{user.name}}" ><br>
+
+            <label for="contact">Contact No:</label><br>
+            <input type="tel" id="contact" name="contact" value="{{user.contact}}" pattern="(?:[0-9]{11}|^$)"><br><br>
+        <input type="submit" value="Edit">
+    </form><br>
+
+    <div id="message"></div>
+
+            <script>
+                document.getElementById('edit-form').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    var formData = new FormData(this);
+                    fetch('/users/{{user.id}}', {
+                        method: 'PUT',
+                        body: JSON.stringify(Object.fromEntries(formData.entries())),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('message').innerText = data.message;
+                        if(data.success) {
+                            document.getElementById('edit-form').reset();
+                            window.location.href = '/all_users/view/{{user.id}}';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            </script>
+            <a href="/security/change-password">Change password</a>
+            {% if session_role==1 and user.role!=1 %}
+            <form id="delete_form">
+                <button type="submit" class="btn btn-dark">Delete User</button>
+            </form>
+            {% endif %}
+            <script>
+            document.getElementById('delete_form').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                var formData = new FormData(this);
+
+                if (confirm('Are you sure you want to delete this user?')) {
+                fetch('/users/{{ user.id }}', {
+                    method: 'DELETE',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+
+                    }
+                    // Optionally, handle successful response here
+                    console.log('User info updated successfully');
+                    window.location.href = '/all_users';
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });}
+            });
+        </script>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

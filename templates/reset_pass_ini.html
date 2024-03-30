@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Register page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    <div class=" row justify-content-center">
+        <div class="col-sm-6 mt-4">
+            <h2>Change Password</h2>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="text" class="form-control" id="email" placeholder="Enter email" name="email">
+                    <small id="error_message1" class="text-danger"></small>
+                </div>
+                <button type="submit" class="btn btn-dark">Submit</button>
+                <a href="/dashboard" class="btn btn-primary">Go Back</a>
+            </form>
+            <div id="responseMessage"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('changePasswordForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+        // Get values from form fields
+        var email = formData.get('email');
+
+        // Create data object to send to server
+        var data = {
+            email: email,
+        };
+
+        fetch('/auth/reset-password/initiate', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('responseMessage').innerText = data.message;
+            if(data.success) {
+                document.getElementById('changePasswordForm').reset();
+                window.location.href = '/security/reset-password/confirm';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+</body>
+</html>

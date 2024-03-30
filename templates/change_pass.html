@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Register page</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    <div class=" row justify-content-center">
+        <div class="col-sm-6 mt-4">
+            <h2>Change Password</h2>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="opwd">Old password:</label>
+                    <input type="password" class="form-control" id="opwd" placeholder="Enter old password" name="opassword">
+                    <small id="error_message1" class="text-danger"></small>
+                </div>
+                <div class="form-group">
+                    <label for="npwd1">New password:</label>
+                    <input type="password" class="form-control" id="npwd1" placeholder="Enter new password" name="npassword1">
+                </div>
+                <div class="form-group">
+                    <label for="npwd2">Re-enter new password:</label>
+                    <input type="password" class="form-control" id="npwd2" placeholder="Re-enter new password" name="npassword2">
+                    <small id="error_message2" class="text-danger"></small>
+                </div>
+
+                <button type="submit" class="btn btn-dark">Submit</button>
+                <a href="/dashboard" class="btn btn-primary">Go Back</a>
+            </form>
+            <div id="responseMessage"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('changePasswordForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+        // Get values from form fields
+        var old_pass = formData.get('opassword');
+        var new_pass1 = formData.get('npassword1');
+        var new_pass2 = formData.get('npassword2');
+
+        // Create data object to send to server
+        var data = {
+            old_pass: old_pass,
+            new_pass1: new_pass1,
+            new_pass2: new_pass2
+        };
+
+        fetch('/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('responseMessage').innerText = data.message;
+            if(data.success) {
+                document.getElementById('changePasswordForm').reset();
+                window.location.href = '/dashboard';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+</body>
+</html>
