@@ -64,6 +64,7 @@ class User(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
     name = db.Column(db.String)
     contact = db.Column(db.String)
+    verified = db.Column(db.Integer)
 
     def __init__(self, email, password, role_id, name="Shreya", contact="01552393972"):
         self.email = email
@@ -71,6 +72,7 @@ class User(db.Model):
         self.role_id = role_id
         self.name = name
         self.contact = contact
+        self.verified = 0
 
     def update_password(self, new_password):
         self.password_hash = generate_password_hash(new_password)

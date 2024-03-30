@@ -1,7 +1,10 @@
-from flask import Blueprint, jsonify, session, request, render_template, redirect, make_response
+import requests
+from flask import Blueprint, jsonify, session, request, render_template, redirect, make_response, url_for
+from auth import send_mail
+from datetime import datetime
 
 # import app
-from models import User, Role, db
+from models import User, Role, db, Verification
 
 users = Blueprint("users", __name__, static_folder="static", template_folder="templates")
 
@@ -44,14 +47,22 @@ def show_ar_add_users():
 
                 return jsonify(response_data), 500
             else:
-                db.session.add(new_user)
-                db.session.commit()
-
-                response_data = {
-                    "success": "True",
-                    "message": "Registration Success: Please Ask User To Check Email"
-                }
-                return jsonify(response_data), 201
+                endpoint2_url = url_for('auth.send_mail', _external=True)
+                response = requests.post(endpoint2_url, json={'email': email})
+                if response.status_code // 100 == 2:
+                    data = response.json()
+                    code = data.get('code')
+                    otp = Verification(email, code, datetime.now())
+                    db.session.add(otp)
+                    db.session.add(new_user)
+                    db.session.commit()
+                    response_data = {
+                        "success": "True",
+                        "message": "Registration Success: Please Ask User To Check Email"
+                    }
+                    return jsonify(response_data), 201
+                else:
+                    return jsonify({"success": False, "message": "Failed to send email"}), response.status_code
 
         else:
             response_data = {

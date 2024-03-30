@@ -39,20 +39,25 @@ def login():
     data = request.json
     email = data.get('email')
     password = data.get('password')
+    print(email)
+    print(password)
 
     user = User.query.filter_by(email=email).first()
 
     # if user and user.check_password(password):
     if user:
-        session['email'] = user.email
-        session['role'] = user.role_id
-        session['id'] = user.id
-        role = Role.query.filter_by(id=user.role_id).first()  # Changed role_id to id
-        session['permissions'] = role.get_permissions()
-        print('logged IN')
-        return jsonify({"success": True, "message": "Successfully logged In"}), 201
+        if user.verified:
+            session['email'] = user.email
+            session['role'] = user.role_id
+            session['id'] = user.id
+            role = Role.query.filter_by(id=user.role_id).first()  # Changed role_id to id
+            session['permissions'] = role.get_permissions()
+            print('logged IN')
+            return jsonify({"success": True, "message": "Successfully logged In"}), 201
+        else:
+            return jsonify({"success": True, "message": "Need to verify account"}), 202
     else:
-        return jsonify({"success": False, "message": "Login Failed"}), 400
+        return jsonify({"success": False, "message": "Login Failed"}), 401
 
 
 @auth.route('/logout-view')
@@ -165,6 +170,25 @@ def reset_pass_confirm():
         if otp.code == code:
             user.update_password(new_password)
             return jsonify({"success": True, "message": "Password Updated"}), 201
+        else:
+            return jsonify({"success": False, "message": "Verification code didn't match"}), 401
+    else:
+        return jsonify({"success": False, "message": "Invalid email"}), 402
+
+
+@auth.route('/login-verification', methods=['POST'])
+def login_verification():
+    data = request.json
+    email = data.get('email')
+    code = data.get('code')
+
+    otp = Verification.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
+    if otp and user:
+        if otp.code == code:
+            user.verified = True
+            db.session.commit()
+            return jsonify({"success": True, "message": "User Verified"}), 201
         else:
             return jsonify({"success": False, "message": "Verification code didn't match"}), 401
     else:
