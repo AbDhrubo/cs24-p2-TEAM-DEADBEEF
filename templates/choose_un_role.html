@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All STS</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <style>
+        /* Additional custom styles */
+        body {
+            background-color: #eafaf1; /* Soothing green background */
+            padding: 20px; /* Add padding */
+        }
+        .container {
+            margin-top: 50px; /* Add space from the top */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff; /* White background */
+            border: 1px solid #dddddd; /* Light gray border */
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2; /* Light gray background */
+            cursor: pointer; /* Add cursor pointer for clickable header */
+        }
+        .btn-create {
+            background-color: #000000; /* Black button background */
+            border-color: #000000; /* Black button border */
+            color: #ffffff; /* White text color */
+        }
+        .btn-create:hover {
+            background-color: #333333; /* Darker black on hover */
+            border-color: #333333; /* Darker black on hover */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+<!--    <h1 class="row justify-content-center">Choose A Role</h1>-->
+<!--    <form id="edit1-form">-->
+<!--        <input type="submit" value="System Admin" class="btn btn-custom">-->
+<!--    </form><br>-->
+
+<!--            <script>-->
+<!--                document.getElementById('edit1-form').addEventListener('submit', function(event) {-->
+<!--                    event.preventDefault();-->
+<!--                    var formData = new FormData(this);-->
+<!--                    fetch('/assign/1/{{id}}', {-->
+<!--                        method: 'PUT',-->
+
+<!--                        headers: {-->
+<!--                            'Content-Type': 'application/json'-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .then(response => response.json())-->
+<!--                    .then(data => {-->
+<!--                        document.getElementById('message').innerText = data.message;-->
+<!--                        if(data.success) {-->
+<!--                            document.getElementById('edit1-form').reset();-->
+<!--                            window.location.href = '/';-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .catch(error => console.error('Error:', error));-->
+<!--                });-->
+<!--            </script>-->
+
+<!--    <form id="edit2-form">-->
+<!--        <input type="submit" value="STS Manager" class="btn btn-custom">-->
+<!--    </form><br>-->
+
+<!--            <script>-->
+<!--                document.getElementById('edit2-form').addEventListener('submit', function(event) {-->
+<!--                    event.preventDefault();-->
+<!--                    var formData = new FormData(this);-->
+<!--                    fetch('/assign/2/{{id}}', {-->
+<!--                        method: 'PUT',-->
+<!--                        body: JSON.stringify(Object.fromEntries(formData.entries())),-->
+<!--                        headers: {-->
+<!--                            'Content-Type': 'application/json'-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .then(response => response.json())-->
+<!--                    .then(data => {-->
+<!--                        document.getElementById('message').innerText = data.message;-->
+<!--                        if(data.success) {-->
+<!--                            document.getElementById('edit2-form').reset();-->
+<!--                            window.location.href = '/';-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .catch(error => console.error('Error:', error));-->
+<!--                });-->
+<!--            </script>-->
+
+<!--    <form id="edit3-form">-->
+<!--        <input type="submit" value="Landfill Manager" class="btn btn-custom">-->
+<!--    </form><br>-->
+
+<!--            <script>-->
+<!--                document.getElementById('edit3-form').addEventListener('submit', function(event) {-->
+<!--                    event.preventDefault();-->
+<!--                    var formData = new FormData(this);-->
+<!--                    fetch('/assign/3/{{id}}', {-->
+<!--                        method: 'PUT',-->
+
+<!--                        headers: {-->
+<!--                            'Content-Type': 'application/json'-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .then(response => response.json())-->
+<!--                    .then(data => {-->
+<!--                        document.getElementById('message').innerText = data.message;-->
+<!--                        if(data.success) {-->
+<!--                            document.getElementById('edit3-form').reset();-->
+<!--                            window.location.href = '/';-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .catch(error => console.error('Error:', error));-->
+<!--                });-->
+<!--            </script>-->
+
+            <form id="edit-form" >
+              <label for="selection">Choose Role:</label>
+              <select id="selection" name="selection">
+                <option value=1>System Admin</option>
+                <option value=2>STS Manager</option>
+                <option value=3>Landfill Manager</option>
+              </select>
+              <br><br>
+              <input type="submit" value="Submit">
+            </form>
+    <div id="message"></div>
+    <script>
+                document.getElementById('edit-form').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    var formData = new FormData(this);
+                    fetch('/unassigned/assign/{{id}}', {
+                        method: 'PUT',
+                        body: JSON.stringify(Object.fromEntries(formData.entries())),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('message').innerText = data.message;
+                        if(data.success) {
+                            document.getElementById('edit-form').reset();
+                            window.location.href = '/unassigned';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            </script>
+
+</div>
+</body>
+</html>

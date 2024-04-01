@@ -55,14 +55,13 @@
                         document.getElementById('message').innerText = data.message;
                         if(data.success) {
                             document.getElementById('edit-form').reset();
-                            window.location.href = '/all_users/view/{{user.id}}';
+                            window.location.href = '/users/{{user.id}}';
                         }
                     })
                     .catch(error => console.error('Error:', error));
                 });
             </script>
-            <a href="/security/change-password">Change password</a>
-            {% if session_role==1 and user.role!=1 %}
+            {% if session_role==1 and session_id!=user.id%}
             <form id="delete_form">
                 <button type="submit" class="btn btn-dark">Delete User</button>
             </form>
@@ -85,7 +84,7 @@
                     }
                     // Optionally, handle successful response here
                     console.log('User info updated successfully');
-                    window.location.href = '/all_users';
+                    window.location.href = '/users';
                 })
                 .catch(error => {
                     console.error('There was a problem with the fetch operation:', error);

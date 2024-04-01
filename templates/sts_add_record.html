@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add STS Record</title>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class=" row justify-content-center">
+        <div class="col-sm-8">
+    <h1>Add Record</h1>
+<!--    <form id="bill-form" action="/bill-view/{{landfill_id}}" method="POST">-->
+            <form id="bill-form">
+                <label for="vehicle">Choose Vehicle ID:</label><br>
+        <select id="vehicle" name="vehicle" required>
+            {% for vehicle_id in vehicle_ids %}
+                <option value="{{ vehicle_id }}">{{ vehicle_id }}</option>
+            {% endfor %}
+        </select>
+                <br>
+
+        <label for="weight">Weight:</label><br>
+        <input type="number" step="0.001" id="weight" name="weight" autocomplete="off" required><br>
+
+                <label for="arrival_date">Arrival Date:</label><br>
+    <select id="arrival_date" name="arrival_date" required>
+        <option value="">Select Date</option>
+
+        <!-- Populate dropdown with options for days -->
+        {% for i in range(1, 32) %}
+            <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+    </select><br>
+
+    <label for="arrival_month">Arrival Month:</label><br>
+    <select id="arrival_month" name="arrival_month" required>
+        <option value="">Select Month</option>
+        <!-- Populate dropdown with options for months -->
+        {% for month in ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] %}
+            <option value="{{ loop.index }}">{{ month }}</option>
+        {% endfor %}
+    </select><br>
+
+    <label for="arrival_year">Arrival Year:</label><br>
+    <select id="arrival_year" name="arrival_year" required>
+        <option value="">Select Year</option>
+        <!-- Populate dropdown with options for years -->
+        {% for year in range(2020, 2050) %}
+            <option value="{{ year }}">{{ year }}</option>
+        {% endfor %}
+    </select><br>
+
+                <label for="arrival_time_hh">Arrival Time (HH):</label><br>
+    <select id="arrival_time_hh" name="arrival_time_hh" required>
+        <option value="">Select Hour</option>
+        <!-- Populate dropdown with options for hours -->
+        {% for hour in range(0, 24) %}
+            <option value="{{ hour }}">{{ "{:02d}".format(hour) }}</option>
+        {% endfor %}
+    </select><br>
+
+    <label for="arrival_time_mm">Arrival Time (MM):</label><br>
+    <select id="arrival_time_mm" name="arrival_time_mm" required>
+        <option value="">Select Minute</option>
+        <!-- Populate dropdown with options for minutes -->
+        {% for minute in range(0, 60) %}
+            <option value="{{ minute }}">{{ "{:02d}".format(minute) }}</option>
+        {% endfor %}
+    </select><br>
+
+        <input type="submit" value="Add Record">
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+       document.getElementById('bill-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var formData = new FormData(this);
+                    fetch('/sts/add-record/{{ward_id}}', {
+                        method: 'POST',
+                        body: JSON.stringify(Object.fromEntries(formData.entries())),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+
+            .then(response => {
+                if (response.status === 201) {
+                    window.location.href = '/dashboard'; // Redirect to dashboard for status 201
+                } else {
+                    throw new Error('Unexpected response status: ' + response.status); // Throw an error for unexpected status
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+    </script>
+     </div>
+    </div>
+</div>
+</body>
+</html>

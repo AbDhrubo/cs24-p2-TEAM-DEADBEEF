@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unassigned Managers</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <style>
+        /* Additional custom styles */
+        body {
+            background-color: #eafaf1; /* Soothing green background */
+            padding: 20px; /* Add padding */
+        }
+        .container {
+            margin-top: 50px; /* Add space from the top */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff; /* White background */
+            border: 1px solid #dddddd; /* Light gray border */
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2; /* Light gray background */
+            cursor: pointer; /* Add cursor pointer for clickable header */
+        }
+        .btn-create {
+            background-color: #000000; /* Black button background */
+            border-color: #000000; /* Black button border */
+            color: #ffffff; /* White text color */
+        }
+        .btn-create:hover {
+            background-color: #333333; /* Darker black on hover */
+            border-color: #333333; /* Darker black on hover */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="row justify-content-center">Unassigned Managers</h1>
+
+    <!-- Search Bar -->
+    <div class="row justify-content-center mb-3">
+        <input type="number" id="searchInput" class="form-control mr-2" placeholder="Search by ID">
+    </div>
+
+    <table id="vehicleTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">ID</th>
+                <th onclick="sortTable(1)">Name</th>
+                <th onclick="sortTable(2)">Email</th>
+                <th onclick="sortTable(3)">Contact No</th>
+                <th>Options</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for manager in managers %}
+    <tr class="vehicleData">
+        <td>{{ manager.id }}</td>
+        <td>{{ manager.name }}</td>
+        <td>{{ manager.email }}</td>
+        <td>{{ manager.contact }}</td>
+        <td>
+            <form id="edit-form-{{ manager.id }}">
+                <button type="submit" class="btn btn-primary">Assign</button>
+            </form>
+            <script>
+                document.getElementById('edit-form-{{ manager.id }}').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    var formData = new FormData(this);
+                    fetch('/landfill/add-manager/{{lf_no}}/{{ manager.id }}', {
+                        method: 'PUT',
+                        body: JSON.stringify(Object.fromEntries(formData.entries())),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('message').innerText = data.message;
+                        if(data.success) {
+                            //
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            </script>
+        </td>
+    </tr>
+{% endfor %}
+
+        </tbody>
+    </table>
+
+</div>
+
+<!-- Include jQuery and custom JavaScript -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function sortTable(colIndex) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("vehicleTable");
+        switching = true;
+        /* Make a loop that will continue until no switching has been done: */
+        while (switching) {
+            /* Start by saying: no switching is done: */
+            switching = false;
+            rows = table.rows;
+            /* Loop through all table rows (except the first, which contains table headers): */
+            for (i = 1; i < (rows.length - 1); i++) {
+                /* Start by saying there should be no switching: */
+                shouldSwitch = false;
+                /* Get the two elements you want to compare, one from current row and one from the next: */
+                x = rows[i].getElementsByTagName("td")[colIndex];
+                y = rows[i + 1].getElementsByTagName("td")[colIndex];
+                /* Check if the two rows should switch place, based on the direction, asc or desc: */
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    /* If so, mark as a switch and break the loop: */
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            if (shouldSwitch) {
+                /* If a switch has been marked, make the switch and mark that a switch has been done: */
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+
+    $(document).ready(function() {
+        $("#searchInput").on("input", function() {
+            var searchValue = parseInt($(this).val());
+            var rows = $("#vehicleTable tbody tr.vehicleData");
+            if (!isNaN(searchValue) && searchValue >= 1) {
+                rows.hide().filter(function() {
+                    return parseInt($(this).find("td:first").text()) === searchValue;
+                }).show();
+            } else {
+                rows.show();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

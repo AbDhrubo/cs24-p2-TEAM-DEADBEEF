@@ -13,9 +13,17 @@ from login import login
 from dashboard import dashboard
 from all_users import all_users
 from users import users
+from profile import profile
 from security import security
+from rbac import rbac
+from roles import roles
 from models import db, User, Role
-
+from sts import sts
+from landfill import landfill
+from vehicle import vehicle
+from unassigned import unassigned
+from bill_view import bill_view
+from bills import bills
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -38,6 +46,15 @@ app.register_blueprint(dashboard, url_prefix="/dashboard")
 app.register_blueprint(all_users, url_prefix="/all_users")
 app.register_blueprint(users, url_prefix="/users")
 app.register_blueprint(security, url_prefix="/security")
+app.register_blueprint(profile, url_prefix="/profile")
+app.register_blueprint(rbac, url_prefix="/rbac")
+app.register_blueprint(roles, url_prefix="/roles")
+app.register_blueprint(sts, url_prefix="/sts")
+app.register_blueprint(landfill, url_prefix="/landfill")
+app.register_blueprint(vehicle, url_prefix="/vehicle")
+app.register_blueprint(unassigned, url_prefix="/unassigned")
+app.register_blueprint(bill_view, url_prefix='/bill-view')
+app.register_blueprint(bills, url_prefix='/bills')
 
 
 with app.app_context():

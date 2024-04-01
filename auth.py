@@ -39,39 +39,25 @@ def login():
     data = request.json
     email = data.get('email')
     password = data.get('password')
+    print(email)
+    print(password)
 
     user = User.query.filter_by(email=email).first()
 
     # if user and user.check_password(password):
     if user:
-        session['email'] = user.email
-        session['role'] = user.role_id
-        session['id'] = user.id
-        role = Role.query.filter_by(id=user.role_id).first()  # Changed role_id to id
-        session['permissions'] = role.get_permissions()
-        print('logged IN')
-        return jsonify({"success": True, "message": "Successfully logged In"}), 201
+        if user.verified:
+            session['email'] = user.email
+            session['role'] = user.role_id
+            session['id'] = user.id
+            role = Role.query.filter_by(id=user.role_id).first()  # Changed role_id to id
+            session['permissions'] = role.get_permissions()
+            print('logged IN')
+            return jsonify({"success": True, "message": "Successfully logged In"}), 201
+        else:
+            return jsonify({"success": True, "message": "Need to verify account"}), 202
     else:
-        return jsonify({"success": False, "message": "Login Failed"}), 400
-
-
-@auth.route('/logout-view')
-def logout_view():
-    endpoint2_url = url_for('auth.logout', _external=True)
-    response = requests.get(endpoint2_url)
-    return redirect('/login')
-
-
-@auth.route('/logout')
-def logout():
-    if 'email' in session:
-        session.pop('email', None)
-        session.pop('role', None)
-        session.pop('id', None)
-        session.pop('permissions', None)
-        return jsonify({"success": True, "message": "Successfully logged Out"}), 201
-    else:
-        return jsonify({"success": False, "message": "Need to login first"}), 400
+        return jsonify({"success": False, "message": "Login Failed"}), 401
 
 
 @auth.route('/mail', methods=['POST'])
@@ -111,6 +97,7 @@ def change_pass():
                 return jsonify({"success": False, "message": "Password needs to be of 8 Characters or more"}), 405
             elif new_pass1 == new_pass2:
                 user.update_password(new_pass1)
+                db.session.commit()
                 return jsonify({"success": True, "message": "Password updated successfully"}), 201
             else:
                 return jsonify({"success": False, "message": "Passwords didn't match"}), 401
@@ -171,6 +158,43 @@ def reset_pass_confirm():
         return jsonify({"success": False, "message": "Invalid email"}), 402
 
 
-# @app.route('/create')
-# def registration():
-#
+@auth.route('/login-verification', methods=['POST'])
+def login_verification():
+    data = request.json
+    email = data.get('email')
+    code = data.get('code')
+
+    otp = Verification.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
+    if otp and user:
+        if otp.code == code:
+            user.verified = True
+            db.session.commit()
+            session['email'] = user.email
+            session['role'] = user.role_id
+            session['id'] = user.id
+            role = Role.query.filter_by(id=user.role_id).first()
+            session['permissions'] = role.get_permissions()
+            return jsonify({"success": True, "message": "User Verified"}), 201
+        else:
+            return jsonify({"success": False, "message": "Verification code didn't match"}), 401
+    else:
+        return jsonify({"success": False, "message": "Invalid email"}), 402
+
+
+@auth.route('/logout')
+def logout():
+    if 'email' in session:
+        session.pop('email', None)
+        session.pop('role', None)
+        session.pop('id', None)
+        session.pop('permissions', None)
+
+        if request.headers.get('accept') == 'application/json':
+            return jsonify({"success": True, "message": "Successfully logged Out"}), 201
+        else:
+            return render_template('index.html')
+
+    else:
+        return jsonify({"success": False, "message": "Need to login first"}), 400
+

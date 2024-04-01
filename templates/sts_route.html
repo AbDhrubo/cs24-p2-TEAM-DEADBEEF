@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Landfill ID</title>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALQ-4LUr6mNIndbvdCCB_1hZhtQ_LtOUg&libraries=places" async defer></script>
+<body>
+
+<form id="myForm">
+  <!-- Hidden input field to store ward_id -->
+  <input type="hidden" id="ward_id" value="{{ward_id}}">
+
+  <label for="dropdown">Select Landfill ID:</label>
+  <select id="dropdown">
+    {% for landfill_id in lf_ids %}
+    <option value="{{ landfill_id }}">Landfill ID: {{ landfill_id }}</option>
+    {% endfor %}
+  </select>
+  <button type="button" id="submitButton">Submit</button> <!-- Changed type to "button" -->
+</form>
+
+<div id="output"></div>
+
+<div id = "map" style="height:400px;width=80%">    </div>
+
+<script>
+document.getElementById("submitButton").addEventListener("click", function(event) {
+  event.preventDefault(); // Prevent the default form submission
+
+  // Retrieve ward_id from the hidden input field
+  var wardId = document.getElementById("ward_id").value;
+  var selectedLandfillId = document.getElementById("dropdown").value;
+
+  // Construct the API URL by concatenating wardId and selectedLandfillId
+  var apiUrl = "http://127.0.0.1:5000/sts/route/" + wardId + "/" + selectedLandfillId;
+
+  // Make a fetch request to the API
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      // Handle the dictionary response data here
+      console.log(data); // Example: Log the response data to the console
+
+      //map
+
+      map = new google.maps.Map(document.getElementById('map'),
+    {
+        center: {lat:23.8041,lng:90.4152},
+        zoom: 13
+        //mapTypeId:google.maps.MyTypeId.ROADMAP
+    })
+
+    const trafficLayer = new google.maps.TrafficLayer();
+    trafficLayer.setMap(map);
+
+
+      google.maps.event.addListener(map,"click",function(event)
+      {
+          this.setOptions({scrollwheel:true})
+      })
+
+      directionsService = new google.maps.DirectionsService()
+      directionsRenderer = new google.maps.DirectionsRenderer()
+      directionsRenderer.setMap(map)
+
+      let request = {
+        //origin:source,
+        origin:{ lat: parseFloat(data['source_lat']), long :parseFloat( data['source_long']) },
+//        destination:dest,
+        destination:{ lat : parseFloat(data['dest_lat']), long : parseFloat(data['dest_long']) },
+        travelMode:'DRIVING',
+        drivingOptions: {
+          departureTime: new Date(),  // request current traffic conditions
+          trafficModel: 'pessimistic' // or 'best_guess' for average traffic
+        }
+  }
+
+  directionsService.route(request,function(result,status)
+  {   if(status == "OK")
+      {
+
+        const output = document.querySelector("#output");
+        output.innerHTML =
+        "<div class= 'alert-info' >From: "+
+        document.getElementById("source").value +".</br>To: "+
+        document.getElementById("dest").value + ".</br> Driving distance: "+
+        result.routes[0].legs[0].distance.text +
+        ".</br>Duration: " + result.routes[0].legs[0].duration.text + ".</div>"
+
+          directionsRenderer.setDirections(result)
+      }
+  })
+
+
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+});
+</script>
+
+</body>
+</html>

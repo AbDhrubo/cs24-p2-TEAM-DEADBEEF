@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Landfill Info</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        /* Additional custom styles */
+        body {
+            background-color: #eafaf1; /* Soothing green background */
+        }
+        .container {
+            margin-top: 50px; /* Add space from the top */
+        }
+        .col-sm-8 {
+            background-color: #f8f9fa; /* Light gray background */
+            border: 2px solid #6c757d; /* Gray border */
+            border-radius: 10px; /* Rounded corners */
+            padding: 20px; /* Add padding */
+        }
+        .btn-edit {
+            background-color: #000000; /* Black button background */
+            border-color: #000000; /* Black button border */
+            color: #ffffff; /* White text color */
+        }
+        .btn-edit:hover {
+            background-color: #333333; /* Darker black on hover */
+            border-color: #333333; /* Darker black on hover */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-sm-8">
+            <h2>Landfill Site Info</h2>
+            <p>
+                <b>ID: </b> {{lf.id}}<br>
+                <b>Area: </b> {{lf.name}}<br>
+                <b>Opening Time: </b> {{lf.open}} <br>
+                <b>Closing Time: </b> {{lf.close}} <br>
+                <b>Capacity: </b> {{lf.capacity}} tonnes<br>
+                <b>Latitude: </b> {{lf.lat}}<br>
+                <b>Longitude: </b> {{lf.long}}<br>
+            </p>
+            <button class="btn btn-primary" onclick="goBack()">Go Back</button>
+
+            <script>
+                function goBack() {
+                  window.history.back();
+                }
+            </script>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

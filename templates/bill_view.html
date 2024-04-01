@@ -1,0 +1,76 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Landfill Record</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-sm-8">
+            <h1>Add Record</h1>
+            <form id="bill-form">
+                <label for="vehicle_id">Vehicle ID:</label><br>
+                <input type="number" step="0.001" id="vehicle_id" name="vehicle_id" autocomplete="off" required><br>
+                <label for="weight">Weight:</label><br>
+                <input type="number" step="0.001" id="weight" name="weight" autocomplete="off" required><br>
+                <input type="submit" value="Get bill token">
+            </form>
+
+            <div id="message"></div>
+
+            <script>
+                document.getElementById('bill-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                var vehicle_id = document.getElementById('vehicle_id').value; // Get vehicle_id value
+                var weight = document.getElementById('weight').value; // Get weight value
+
+                // Make sure vehicle_id and weight are valid values before proceeding
+                if (vehicle_id && weight) {
+                    var formData = new FormData(this);
+                    fetch('/bill-view/{{landfill_id}}', {
+                        method: 'POST',
+                        body: JSON.stringify(Object.fromEntries(formData.entries())),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json(); // Parse the response as JSON
+                        } else {
+                            throw new Error('Unexpected response status: ' + response.status); // Throw an error for unexpected status
+                        }
+                    })
+                    .then(data => {
+                        // Extract bill_id and timestamp from the response
+                        var bill_id = data.bill_id;
+                        var timestamp = data.timestamp;
+                        var bill = parseFloat(data.bill).toFixed(2)
+                        var weight2 = parseFloat(data.weight).toFixed(2)
+                        // Construct the URL for generating the PDF
+                        var pdfUrl = '/bill-view/new-pdf/${bill_id}/${bill}/${vehicle_id}/${weight2}/${timestamp}';
+                           //console.log('done');
+                        // Make a request to generate the PDF
+                        window.open(pdfUrl);
+                        window.location.reload();
+                    })
+                    .catch(error => console.error('Error:', error));
+                } else {
+                    console.error('Vehicle ID and Weight are required.');
+                }
+            });
+            </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>

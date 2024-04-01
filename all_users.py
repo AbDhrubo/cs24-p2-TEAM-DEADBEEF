@@ -6,11 +6,9 @@ from models import User
 all_users = Blueprint("all_users", __name__, static_folder="static", template_folder="templates")
 
 
+# fixed
 @all_users.route('/')
 def all_users_view():
-    # session_cookie = {'session': 'eyJlbWFpbCI6ImRocnVib0BkaHJ1Ym8uY29tIiwicGVybWlzc2lvbnMiOlsxLDIsMyw0XSwicm9sZSI6MX0.ZgbErA.ccvY3OEWBbxtw8loc_LSZBwvlSg'}
-    # response = requests.get('http://localhost:5000//users', cookies=session_cookie)
-    print(session['role'])
     response = requests.get('http://localhost:5000/users')
 
     if response.status_code == 200:
@@ -26,6 +24,7 @@ def create_new_user():
         return render_template('create_user.html')
 
 
+# fixed
 @all_users.route('/view/<int:userId>')
 def view_user(userId: int):
 
@@ -34,7 +33,7 @@ def view_user(userId: int):
 
     user_data = response.json()
     if response.status_code == 200:
-        return render_template('dashboard.html', session_role=session['role'], session_id=session['id'], user=user_data)
+        return render_template('others_profile.html', session_role=session['role'], session_id=session['id'], user=user_data)
     else:
         return render_template('error.html', code=response.status_code)
 
@@ -45,5 +44,14 @@ def edit_user(userId: int):
     if user:
         user_data = {'id': user.id, 'name': user.name, 'email': user.email, 'contact': user.contact,
                      'role': user.role_id}
-    return render_template('edit_user.html', session_role=session['role'], user=user_data)
+        return render_template('edit_user.html', session_role=session['role'], session_id=session['id'], user=user_data)
+
+
+@all_users.route('/own_edit')
+def edit_own():
+    user = User.query.filter_by(id=session['id']).first()
+    if user:
+        user_data = {'id': user.id, 'name': user.name, 'email': user.email, 'contact': user.contact,
+                     'role': user.role_id}
+        return render_template('edit_own.html', user=user_data)
 

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Truck</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class=" row justify-content-center">
+        <div class="col-sm-8">
+      <h2>Add New Truck</h2>
+        <form id="create-form">
+            <label for="reg_num">Registration No:</label><br>
+            <input type="text" id="reg_num" name="reg_num" placeholder="Enter Registration No" required><br>
+
+            <label for="vehicle_type">Select Type:</label><br>
+            <select id="vehicle_type" name="vehicle_type">
+              <option value=1>Open Truck</option>
+              <option value=2>Dump Truck</option>
+              <option value=3>Compactor</option>
+              <option value=4>Container Carrier</option>
+            </select><br>
+
+            <label for="fcpk_l">Fuel Cost Per Kilometer(Loaded):</label><br>
+            <input type="number" id="fcpk_l" name="fcpk_l" placeholder="Enter Fuel Cost(Loaded)" required><br>
+
+            <label for="fcpk_ul">Fuel Cost Per Kilometer(Unloaded):</label><br>
+            <input type="number" id="fcpk_ul" name="fcpk_ul" placeholder="Enter Fuel Cost(Unoaded)" required><br><br>
+        <input type="submit" value="Register">
+    </form>
+
+      <div id="message"></div>
+
+    <script>
+        document.getElementById('create-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/vehicle', {
+                method: 'POST',
+                body: JSON.stringify(Object.fromEntries(formData.entries())),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('message').innerText = data.message;
+                if(data.success) {
+                    document.getElementById('create-form').reset();
+                    window.location.href = '/vehicle';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+        </div>
+    </div>
+</div>
+</body>
+</html>

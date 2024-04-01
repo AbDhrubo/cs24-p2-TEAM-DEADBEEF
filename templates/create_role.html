@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoSync</title>
+<style>
+    body
+    {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #eafaf1;
+    }
+
+    form
+    {
+        text-align: center;
+    }
+
+    .toggle-buttons
+    {
+        text-align: right; /* Align switches to the right */
+    }
+
+    .toggle-switch
+    {
+        display: flex;
+        justify-content: space-between; /* Adjust to place switch title and button on both sides */
+        align-items: center; /*Vertically center align switch */
+        width: auto; /* Adjust width as needed */
+        height: 30px;
+        margin: 10px auto;
+        cursor: pointer;
+    }
+
+    .toggle-switch .switch-title
+    {
+        margin-right: 10px;  /* Remove margin-right */
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        font-weight: semi-bold;
+    }
+
+    .toggle-switch .switch-handle
+    {
+        width: 60px;
+        height: 100%;
+        background-color: #ccc;
+        border-radius: 15px;
+        position: relative;
+        cursor: pointer;
+        -webkit-transition: .4s;
+        transition: .4s;
+        outline: 2px solid #0A5C36;
+
+    }
+
+    .toggle-switch .switch-handle::before
+    {
+        content:'';
+        position: absolute;
+        content: "";
+        left: 4px;
+        bottom: 4px;
+        height: 20px;
+        width: 20px;
+        background-color: #0A5C36;
+        border-radius: 50%;
+        -webkit-transition: .4s;
+        transition: .4s;
+
+    }
+
+    .toggle-switch.active .switch-handle
+    {
+        background-color: #2196F3;
+        postion: relative;
+    }
+
+    .toggle-switch.active .switch-handle::before
+    {
+        content: '';
+        position: absolute;
+        top: 20%;
+        left: 5px;
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #000;
+    }
+
+
+
+    .toggle-button
+    {
+        display: none;
+    }
+
+    #selectedButtons
+    {
+        margin-top: 20px;
+    }
+
+    .h3-font
+    {
+        font-family: Arial, sans-serif;
+        font-size: 15px;
+        font-weight: bold;
+        /* Add more font properties as needed */
+    }
+
+    .btn-custom {
+        background-color: #0A5C36; /* Green background color */
+        border: none; /* Remove border */
+        color: white; /* White text color */
+        padding: 15px 32px; /* Padding */
+        text-align: center; /* Center text */
+        text-decoration: none; /* Remove underline */
+        display: inline-block; /* Display as inline-block */
+        font-size: 16px; /* Font size */
+        margin: 4px 2px; /* Margin */
+        transition-duration: 0.4s; /* Transition duration */
+        cursor: pointer; /* Cursor pointer */
+        border-radius: 8px; /* Border radius */
+    }
+
+    .btn-custom:hover {
+        background-color: #45a049; /* Darker green background color on hover */
+        color: white; /* White text color on hover */
+    }
+
+</style>
+</head>
+<body>
+
+<form id="myForm">
+    <label for="name" class="h3-font">Role Name</label>
+    <input type="text" id="name" name="name" required><br><br>
+
+    <div class="toggle-buttons">
+        <!-- Dynamic generation of toggle switches based on Flask variables -->
+        {% for i in range(count) %}
+        <div class="toggle-switch">
+            <label class="toggle-switch">
+                <span class="switch-title">{{ titles[i] }}</span>
+                <input type="checkbox" class="toggle-button" name="button{{ i+1 }}" value="{{ i+1 }}">
+                <span class="switch-handle"></span>
+            </label>
+        </div>
+
+        {% endfor %}
+    </div>
+
+    <br>
+    <div id="responseMessage"></div>
+    <br>
+    <input type="submit" class = "btn-custom" value="Submit">
+</form>
+
+<div id="selectedButtons"></div>
+
+<script>
+    // Function to handle toggle switch state
+    function toggleSwitch() {
+        var handle = this.querySelector('.switch-handle');
+        if (this.querySelector('.toggle-button').checked) {
+
+            this.classList.add('active');
+        } else {
+            this.classList.remove('active');
+        }
+    }
+
+    // Add click event listeners to toggle switches
+    var switches = document.querySelectorAll('.toggle-switch');
+    switches.forEach(function(switchEl) {
+        switchEl.addEventListener('click', toggleSwitch);
+    });
+
+    // Function to handle form submission
+    document.getElementById('myForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        var formData = new FormData(this);
+        var data = {};
+        for (var pair of formData.entries()) {
+            data[pair[0]] = pair[1];
+        }
+        // Get active toggle button values
+        var activeButtonValues = [];
+        document.querySelectorAll('.toggle-button:checked').forEach(function(button) {
+            activeButtonValues.push(parseInt(button.value)); // Convert string to integer
+        });
+        data.toggleableButtons = activeButtonValues;
+        var selectedButtonsDiv = document.getElementById('selectedButtons');
+
+        //selectedButtonsDiv.textContent = 'Selected Buttons: ' + JSON.stringify(activeButtonValues);
+        var name = document.getElementById('name').value;
+
+        // Create data object to send to server
+        var data = {
+            role_name: name,
+            permissions: JSON.stringify(activeButtonValues)
+        };
+
+        fetch('/rbac/roles', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('responseMessage').innerText = data.message;
+            if(data.success) {
+                var form = document.getElementById('myForm');
+                if (form) {
+                    form.reset();
+                }
+                window.location.href = '/roles';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+        console.log(data); // You can send this data to your server or perform any other action
+
+    });
+</script>
+
+</body>
+</html>
